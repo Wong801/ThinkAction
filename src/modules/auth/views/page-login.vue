@@ -1,11 +1,18 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { BaseInput } from '@/components/index'
+import { useUserStore, type UserLoginInterface } from '@/stores/user'
 
-const form = ref({
+const userStore = useUserStore()
+
+const form = ref<UserLoginInterface>({
   email: '',
   password: ''
 })
+
+const login = async (form: UserLoginInterface) => {
+  return await userStore.login(form)
+}
 </script>
 
 <template>
@@ -17,7 +24,7 @@ const form = ref({
       <p class="text-[grey]">Hi there! Nice to see you again</p>
     </div>
 
-    <form action="" method="post" class="space-y-5 text-center">
+    <form @submit.prevent="login(form)" class="space-y-5 text-center">
       <div class="space-y-2">
         <component
           :is="BaseInput"
@@ -37,7 +44,9 @@ const form = ref({
           class="text-left"
         ></component>
       </div>
-      <button class="btn w-full md:w-[300px] bg-[#3D8AF7] font-bold text-white">Sign In</button>
+      <button type="submit" class="btn w-full md:w-[300px] bg-[#3D8AF7] font-bold text-white">
+        Sign In
+      </button>
     </form>
 
     <p class="text-slate text-center my-4 font-semibold">or use one of your social profiles</p>
