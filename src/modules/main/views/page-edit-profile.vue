@@ -1,27 +1,60 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, type Ref } from 'vue'
 import { BaseInput, BaseSelect } from '@/components/index'
+import {
+  useUserStore,
+  type UserDataInterface,
+  type UserUpdateProfileInterface
+} from '@/stores/user'
+import { useImageStore } from '@/stores/image'
 
-const user = ref({
-  id: 'GhtHVSB12NHGBSGHHg',
-  full_name: 'Fitri Andriyani',
-  username: 'fitri07',
-  email: 'fitri07@gmail.com',
-  password: '123456',
-  avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-  bio: 'nothing to see here',
-  is_private: false
+const userStore = useUserStore()
+const imageStore = useImageStore()
+
+const user: Ref<UserDataInterface> = ref({ ...(userStore.userData as UserDataInterface) })
+
+const form: Ref<UserUpdateProfileInterface> = ref({
+  bio: user.value.bio,
+  fullname: user.value.fullname,
+  isPublic: user.value.isPublic,
+  photo: user.value.photo,
+  username: user.value.username
 })
 
+const fakepath = ref('')
+
+const setThumbnail = (e: Event) => {
+  const inputEvent = e
+  const file = ((inputEvent?.target as HTMLInputElement)?.files as FileList)[0]
+
+  form.value.photo = file
+  fakepath.value = URL.createObjectURL(form.value.photo)
+}
+
+const editProfile = async (payload: UserUpdateProfileInterface) => {
+  if (payload.photo instanceof File) {
+    const imageKey = await imageStore.uploadImage({ image: payload.photo })
+    payload.photo = imageKey
+  }
+
+  await userStore.editUserData(payload)
+
+  form.value.bio = user.value.bio
+  form.value.fullname = user.value.fullname
+  form.value.isPublic = user.value.isPublic
+  form.value.photo = user.value.photo
+  form.value.username = user.value.username
+}
+
 const list = [
-  { id: 1, label: 'Private' },
-  { id: 2, label: 'Public' }
+  { id: 1, label: 'Private', value: false },
+  { id: 2, label: 'Public', value: true }
 ]
 
-const languages = ref([
-  { id: 1, label: 'English' },
-  { id: 2, label: 'Indonesian' }
-])
+// const languages = ref([
+//   { id: 1, label: 'English' },
+//   { id: 2, label: 'Indonesian' }
+// ])
 </script>
 
 <template>
@@ -41,14 +74,16 @@ const languages = ref([
     <hr class="bg-slate h-[1px]" />
 
     <div class="flex justify-center space-x-5 mt-5">
-      <img :src="user.avatar" alt="user photo" class="rounded-full" />
+      <div class="mt-5 rounded-full h-[8rem] w-[8rem] overflow-hidden">
+        <img :src="fakepath || (form.photo as string)" alt="user photo" class="w-full" />
+      </div>
       <div class="mt-5">
-        <p>{{ user.full_name }}</p>
+        <p>{{ form.fullname }}</p>
 
         <!-- CHANGE FOTO PROFILE -->
         <span class="font-semibold text-[#3D8AF7] block mb-2">Change your profile picture</span>
         <label class="btn btn-primary bg-[#3D8AF7] mb-8">
-          <input type="file" class="pointer-events-none absolute opacity-0" />
+          <input @change="setThumbnail" type="file" class="pointer-events-none absolute opacity-0" />
           <div class="flex items-center space-x-2">
             <!-- <i class="block i-far-arrow-up-from-bracket"></i> -->
             <span>Choose File</span>
@@ -59,36 +94,31 @@ const languages = ref([
 
     <!-- input - full_name -->
     <span class="font-semibold text-[#3D8AF7] block mb-2">Full Name</span>
-    <component :is="BaseInput" v-model="user.full_name" class="mb-8"></component>
+    <component :is="BaseInput" v-model="form.fullname" class="mb-8"></component>
 
     <!-- input - username -->
     <span class="font-semibold text-[#3D8AF7] block mb-2">Username</span>
-    <component :is="BaseInput" v-model="user.username" class="mb-8"></component>
+    <component :is="BaseInput" v-model="form.username" class="mb-8"></component>
 
     <!-- input - email -->
     <span class="font-semibold text-[#3D8AF7] block mb-2">Email</span>
-    <component :is="BaseInput" v-model="user.email" class="mb-8"></component>
+    <component :is="BaseInput" v-model="user.email" class="mb-8" disabled></component>
 
     <!-- input - bio -->
     <span class="font-semibold text-[#3D8AF7] block mb-2">Bio</span>
-    <component :is="BaseInput" v-model="user.bio" class="mb-8"></component>
+    <component :is="BaseInput" v-model="form.bio" class="mb-8"></component>
 
     <!-- share with -->
     <span class="font-semibold text-[#3D8AF7] block mb-2">Account Type</span>
-    <component
-      :is="BaseSelect"
-      class="mb-8"
-      v-model="user.is_private"
-      :list="list"
-      border="full"
-    ></component>
+    <component :is="BaseSelect" class="mb-8" v-model="user.isPublic" :list="list" border="full">
+    </component>
 
     <!-- share with -->
-    <span class="font-semibold text-[#3D8AF7] block mb-2">Language</span>
-    <component :is="BaseSelect" v-model="languages" :list="languages" border="full"></component>
+    <!-- <span class="font-semibold text-[#3D8AF7] block mb-2">Language</span>
+    <component :is="BaseSelect" v-model="languages" :list="languages" border="full"></component> -->
 
     <div class="flex justify-center space-x-8 mt-8">
-      <button class="btn btn-primary bg-[#3D8AF7] px-7">SAVE</button>
+      <button @click="editProfile(form)" class="btn btn-primary bg-[#3D8AF7] px-7">SAVE</button>
       <button class="btn btn-primary bg-[#de2a2a]">CANCEL</button>
     </div>
   </div>

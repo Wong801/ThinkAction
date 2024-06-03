@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<Props>(), {})
     <div class="grid grid-cols-3 gap-1">
       <div v-for="category in props.resolution_categories" :key="category.id">
         <button class="btn btn-outline-info hover:bg-[#3D8AF7] overflow-hidden">
-          {{ category.category }}
+          {{ category.name }}
         </button>
       </div>
     </div>

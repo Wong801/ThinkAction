@@ -1,4 +1,5 @@
-import type { RouteRecordRaw } from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router'
+import auth from './middlewares/auth.middleware'
 
 export const routes: RouteRecordRaw = {
   path: '/',
@@ -85,5 +86,8 @@ export const routes: RouteRecordRaw = {
         }
       ]
     }
-  ]
+  ],
+  meta: {
+    middleware: [auth]
+  }
 }

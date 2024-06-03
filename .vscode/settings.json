@@ -6,5 +6,7 @@
   "css.customData": [".vscode/unocss.json"],
   "files.associations": {
     "*.css": "postcss"
-  }
+  },
+  "prettier.vueIndentScriptAndStyle": false,
+  "vue.format.wrapAttributes": "aligned-multiple"
 }

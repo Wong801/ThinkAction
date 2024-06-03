@@ -2,8 +2,10 @@
 import { ref } from 'vue'
 import { BaseInput } from '@/components/index'
 import { useUserStore, type UserLoginInterface } from '@/stores/user'
+import { useRouter } from 'vue-router'
 
 const userStore = useUserStore()
+const router = useRouter()
 
 const form = ref<UserLoginInterface>({
   email: '',
@@ -11,7 +13,11 @@ const form = ref<UserLoginInterface>({
 })
 
 const login = async (form: UserLoginInterface) => {
-  return await userStore.login(form)
+  if (await userStore.login(form)) {
+    return router.push({
+      path: 'profile'
+    })
+  }
 }
 </script>
 
@@ -42,7 +48,8 @@ const login = async (form: UserLoginInterface) => {
           type="password"
           error=""
           class="text-left"
-        ></component>
+        >
+        </component>
       </div>
       <button type="submit" class="btn w-full md:w-[300px] bg-[#3D8AF7] font-bold text-white">
         Sign In

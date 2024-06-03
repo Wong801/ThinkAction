@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import moment from 'moment'
 import { BasePopper } from '@/components/index'
 import BaseModal, { type SizeType } from '@/components/base-modal.vue'
+import type { UserInfoInterface } from '@/stores/post'
 const showModal = ref(false)
 const sizeModal = ref<SizeType>('md')
 const openModal = (size: SizeType) => {
@@ -10,15 +11,9 @@ const openModal = (size: SizeType) => {
   showModal.value = true
 }
 
-type User = {
-  [key: string]: any
-  name: string
-  avatar?: string
-}
-
 export interface Props {
   id?: string
-  user?: User
+  user?: UserInfoInterface
   category?: string
   caption?: string
   photos?: Array<string>
@@ -29,7 +24,7 @@ export interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  avatar: '/public/profile.png',
+  photo: '/public/profile.png',
   is_liked: false,
   cheers_count: 0,
   comments_count: 0
@@ -41,13 +36,11 @@ const props = withDefaults(defineProps<Props>(), {
     <!-- user info -->
     <div class="flex space-x-3 mb-3 justify-between">
       <div class="flex">
-        <img
-          :src="props.user?.avatar"
-          alt="user-photo"
-          class="w-20 h-20 bg-slate-300 rounded-full"
-        />
+        <div class="overflow-hidden w-[4rem] h-[4rem] rounded-full mr-6">
+          <img :src="props.user?.photo" alt="user-photo" class="w-full" />
+        </div>
         <div>
-          <p class="font-bold">{{ props.user?.name }}</p>
+          <p class="font-bold">{{ props.user?.username }}</p>
           <p>{{ props.category }}</p>
           <p>{{ moment(props.date_time).fromNow() }}</p>
         </div>
@@ -68,12 +61,7 @@ const props = withDefaults(defineProps<Props>(), {
             <button @click="openModal('sm')" class="block px-5 py-3 w-full text-left">
               Delete
             </button>
-            <component
-              :is="BaseModal"
-              :is-open="showModal"
-              @on-close="showModal = false"
-              :size="sizeModal"
-            >
+            <component :is="BaseModal" :is-open="showModal" @on-close="showModal = false" :size="sizeModal">
               <template #content>
                 <!-- ALERT CONTENT -->
                 <div class="max-h-90vh overflow-auto p-4 text-center">
@@ -103,9 +91,8 @@ const props = withDefaults(defineProps<Props>(), {
 
     <!-- Slider main container -->
     <swiper-container class="mySwiper" navigation="true">
-      <swiper-slide v-for="photo in props.photos" :key="props.photos?.indexOf(photo)"
-        ><img :src="photo" alt="goals image" class="w-[200px] h-[200px]"
-      /></swiper-slide>
+      <swiper-slide v-for="photo in props.photos" :key="props.photos?.indexOf(photo)"><img :src="photo"
+          alt="goals image" class="w-[200px] h-[200px]" /></swiper-slide>
     </swiper-container>
 
     <!-- cheers and comments -->

@@ -22,7 +22,7 @@ export interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  avatar: '/profile.png'
+  avatar: '/public/profile.png'
 })
 
 const text = ref('')
@@ -49,11 +49,8 @@ let showReplies = ref(false)
 
       <div class="flex justify-between my-2">
         <button @click="showTextarea = !showTextarea" class="text-blue-500 underline">Reply</button>
-        <button
-          @click="showReplies = !showReplies"
-          v-if="props.replies && props.replies.length != 0"
-          class="text-blue-500 underline"
-        >
+        <button @click="showReplies = !showReplies" v-if="props.replies && props.replies.length != 0"
+          class="text-blue-500 underline">
           See {{ props.replies.length }} replies
         </button>
       </div>

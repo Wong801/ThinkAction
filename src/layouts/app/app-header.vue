@@ -1,9 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { BaseInput, BasePopper } from '@/components/index'
 import ComponentToggleSidebar from './component-toggle-sidebar.vue'
 import { appName } from '@/config/app'
 import { RouterLink } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+
+const userStore = useUserStore()
+
+const user = computed(() => userStore.userData)
 
 const form = ref({
   key: ''
@@ -32,18 +37,14 @@ const form = ref({
         <div>
           <!-- screen: lg -->
           <div class="invisible md:visible flex items-center space-x-5">
-            <component
-              :is="BaseInput"
-              v-model="form.key"
-              placeholder="Cari pengguna"
-              class="border-2 border-slate rounded-lg"
-            ></component>
+            <component :is="BaseInput" v-model="form.key" placeholder="Cari pengguna"
+              class="border-2 border-slate rounded-lg"></component>
 
             <router-link :to="{ path: '/' }">
               <span>Home</span>
             </router-link>
 
-            <component :is="BasePopper" placement="bottom-start">
+            <component :is="BasePopper" placement="bottom-start" :class="!user ? 'invisible' : ''">
               <button class="ml-5">Create Goals</button>
               <template #content>
                 <div class="rounded-lg">
@@ -68,12 +69,19 @@ const form = ref({
               </template>
             </component>
 
-            <router-link :to="{ path: '/notification' }">
+            <router-link :to="{ path: '/notification' }" :class="!user ? 'invisible' : ''">
               <span>Notification</span>
             </router-link>
 
-            <div class="avatar avatar-sm">
-              <span class="avatar-initial rounded-full bg-warning text-white">JD</span>
+            <div v-if="user">
+              <router-link :to="{ path: '/profile' }" class="avatar avatar-sm">
+                <img :src="user.photo" class="avatar-initial rounded-full bg-warning text-white" />
+              </router-link>
+            </div>
+            <div v-else>
+              <router-link :to="{ path: '/login' }">
+                <span>Login</span>
+              </router-link>
             </div>
           </div>
         </div>
