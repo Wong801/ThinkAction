@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, type Ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import { BaseInput, BaseSelect } from '@/components/index'
 import {
   useUserStore,
@@ -83,7 +83,11 @@ const list = [
         <!-- CHANGE FOTO PROFILE -->
         <span class="font-semibold text-[#3D8AF7] block mb-2">Change your profile picture</span>
         <label class="btn btn-primary bg-[#3D8AF7] mb-8">
-          <input @change="setThumbnail" type="file" class="pointer-events-none absolute opacity-0" />
+          <input
+            @change="setThumbnail"
+            type="file"
+            class="pointer-events-none absolute opacity-0"
+          />
           <div class="flex items-center space-x-2">
             <!-- <i class="block i-far-arrow-up-from-bracket"></i> -->
             <span>Choose File</span>

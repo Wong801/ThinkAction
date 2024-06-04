@@ -4,6 +4,12 @@ import moment from 'moment'
 import { BasePopper } from '@/components/index'
 import BaseModal, { type SizeType } from '@/components/base-modal.vue'
 import type { UserInfoInterface } from '@/stores/post'
+import { Swiper, SwiperSlide } from 'swiper/vue'
+// import Swiper and modules styles
+import 'swiper/css'
+import 'swiper/css/navigation'
+import 'swiper/css/pagination'
+
 const showModal = ref(false)
 const sizeModal = ref<SizeType>('md')
 const openModal = (size: SizeType) => {
@@ -61,7 +67,12 @@ const props = withDefaults(defineProps<Props>(), {
             <button @click="openModal('sm')" class="block px-5 py-3 w-full text-left">
               Delete
             </button>
-            <component :is="BaseModal" :is-open="showModal" @on-close="showModal = false" :size="sizeModal">
+            <component
+              :is="BaseModal"
+              :is-open="showModal"
+              @on-close="showModal = false"
+              :size="sizeModal"
+            >
               <template #content>
                 <!-- ALERT CONTENT -->
                 <div class="max-h-90vh overflow-auto p-4 text-center">
@@ -90,10 +101,11 @@ const props = withDefaults(defineProps<Props>(), {
     <p>{{ props.caption }}</p>
 
     <!-- Slider main container -->
-    <swiper-container class="mySwiper" navigation="true">
-      <swiper-slide v-for="photo in props.photos" :key="props.photos?.indexOf(photo)"><img :src="photo"
-          alt="goals image" class="w-[200px] h-[200px]" /></swiper-slide>
-    </swiper-container>
+    <swiper class="mySwiper" :navigation="true">
+      <swiper-slide v-for="photo in props.photos" :key="props.photos?.indexOf(photo)"
+        ><img :src="photo" alt="goals image"
+      /></swiper-slide>
+    </swiper>
 
     <!-- cheers and comments -->
     <div>
@@ -131,12 +143,11 @@ body {
   padding: 0;
 }
 
-swiper-container {
-  width: 100%;
-  height: 100%;
+.swiper {
+  height: 32rem;
 }
 
-swiper-slide {
+.swiper .swiper-slide {
   text-align: center;
   font-size: 18px;
   background: #fff;
@@ -145,9 +156,9 @@ swiper-slide {
   align-items: center;
 }
 
-swiper-slide img {
+.swiper .swiper-slide img {
   display: block;
-  width: 100%;
+  width: auto;
   height: 100%;
   object-fit: cover;
 }

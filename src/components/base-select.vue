@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const clearSelect = () => {
-  selected.value = {}
+  selected.value = { label: '' }
 }
 
 const emit = defineEmits<{
@@ -32,7 +32,7 @@ const selected = computed({
     emit('update:modelValue', obj.value)
   },
   get: () => {
-    const found = props.list.find((i) => i.value === props.modelValue)
+    const found = props.list?.find((i) => i.value === props.modelValue)
     if (!found) return { label: '' }
     return found
   }
@@ -42,10 +42,13 @@ const selected = computed({
 <template>
   <Listbox v-model="selected">
     <div class="list-box">
-      <ListboxButton class="list-box-button" :class="{
-        border: props.border === 'full',
-        'border-b': props.border === 'simple'
-      }">
+      <ListboxButton
+        class="list-box-button"
+        :class="{
+          border: props.border === 'full',
+          'border-b': props.border === 'simple'
+        }"
+      >
         <span v-if="!selected.label" class="block text-slate-400">
           {{ props.placeholder }}
         </span>
@@ -58,15 +61,22 @@ const selected = computed({
 
       <transition>
         <ListboxOptions class="list-box-options">
-          <ListboxOption v-slot="{ active, selected }" v-for="(data, index) in list" :key="index" :value="data"
-            as="template">
-            <li :class="[
-              active ? 'list-box-option-active' : 'list-box-option-inactive',
-              'list-box-option'
-            ]">
+          <ListboxOption
+            v-slot="{ active, selected }"
+            v-for="(data, index) in list"
+            :key="index"
+            :value="data"
+            as="template"
+          >
+            <li
+              :class="[
+                active ? 'list-box-option-active' : 'list-box-option-inactive',
+                'list-box-option'
+              ]"
+            >
               <span :class="[selected ? 'font-extrabold' : 'font-normal', 'block ']">{{
                 data.label
-                }}</span>
+              }}</span>
             </li>
           </ListboxOption>
         </ListboxOptions>

@@ -1,46 +1,30 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import UserPost from '../components/user-post.vue'
+import { usePostStore } from '@/stores/post'
 
-const posts = ref([
-  {
-    id: 'GhtHVSB12NHGBSGHHt',
-    user: {
-      name: 'Fitri',
-      avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL'
-    },
-    category: 'Finance',
-    caption: 'Lorem ipsum dolor sit amet.',
-    photos: [
-      'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-      'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL'
-    ],
-    is_liked: false,
-    cheers_count: 20,
-    comments_count: 10,
-    date_time: '2019-08-24T14:15:22Z'
-  },
-  {
-    id: 'GhtHVSB12NHGBSGHHg',
-    user: {
-      name: 'Fitri A',
-      avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL'
-    },
-    category: 'Finance',
-    caption: 'Lorem ipsum dolor sit amet.',
-    photos: ['https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL'],
-    is_liked: false,
-    cheers_count: 20,
-    comments_count: 10,
-    date_time: '2019-08-24T14:15:22Z'
+const postStore = usePostStore()
+
+const postData = computed(() => postStore.posts)
+
+const posts = ref(postData.value.data)
+
+onMounted(async () => {
+  await postStore.getAllPosts()
+})
+
+watch(
+  () => postData.value.data,
+  (val) => {
+    posts.value = val
   }
-])
+)
 </script>
 
 <template>
   <div class="main-content-container">
     <!-- jika post belum dibuat -->
-    <div v-if="posts.length < 1" class="flex justify-center lg:space-x-15">
+    <div v-if="!posts.length" class="flex justify-center lg:space-x-15">
       <div class="md:mt-[50px] lg:mt-[100px] space-y-5">
         <h1 class="font-extrabold">Welcome to ThinkAction</h1>
         <p>
@@ -68,19 +52,19 @@ const posts = ref([
       />
     </div>
 
-    <!-- jika goals sudah dibuat -->
-    <div v-if="posts.length > 0">
-      <div v-for="post in posts" :key="post.id">
+    <div v-else>
+      <!-- jika goals sudah dibuat -->
+      <div v-for="post in posts" :key="post._id">
         <UserPost
-          :id="post.id"
-          :user="post.user"
-          :category="post.category"
+          :id="post._id"
+          :user="post.userInfo"
+          :category="post.categoryResolution"
           :caption="post.caption"
-          :photos="post.photos"
-          :is_liked="post.is_liked"
-          :cheers_count="post.cheers_count"
-          :comments_count="post.comments_count"
-          :date_time="post.date_time"
+          :photos="post.photo"
+          v-model:isLiked="post.likedByCurrent"
+          v-model:cheersCount="post.likeCount"
+          :commentsCount="post.commentCount"
+          :date_time="post.createdDate"
         ></UserPost>
       </div>
     </div>

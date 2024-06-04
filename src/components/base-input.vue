@@ -15,6 +15,7 @@ export interface Props {
   disabled?: boolean
   helper?: string
   error?: string
+  value?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -30,12 +31,9 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
 }>()
 
-const value = computed({
-  set: (text: string) => {
-    emit('update:modelValue', text)
-  },
-  get: () => props.modelValue
-})
+const updateValue = (e: Event) => {
+  emit('update:modelValue', (e.target as HTMLInputElement).value)
+}
 
 const prefixRef = ref()
 const suffixRef = ref()
@@ -83,7 +81,8 @@ onMounted(() => {
             'border ': border === 'full',
             'border-none': border === 'none'
           }"
-          v-model="value"
+          :value="modelValue"
+          @input="updateValue"
           :type="props.type"
           :placeholder="props.placeholder"
           :required="props.required"

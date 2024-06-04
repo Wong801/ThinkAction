@@ -4,7 +4,7 @@ import { ref, type Ref } from 'vue'
 
 export interface UserDataInterface {
   bio: string
-  categoryResolution: Array<any>
+  categoryResolution: CategoryResolutionInterface[]
   email: string
   fullname: string
   isAuthenticatedUser: boolean
@@ -18,6 +18,18 @@ export interface UserDataInterface {
   isSupporting: boolean
   goalsPerformance: any
   isPrivate: boolean
+  _id: string
+}
+
+export interface OtherUserInterface extends UserDataInterface {
+  performanceReport: number
+}
+
+export interface CategoryResolutionInterface {
+  createdDate?: Date
+  isComplete: boolean
+  name: string
+  resolution: string
   _id: string
 }
 
@@ -39,8 +51,36 @@ export interface UserUpdateProfileInterface {
   isPublic: boolean
 }
 
+export interface UserSupporterInterface {
+  _id: string
+  username: string
+  email: string
+  fullname: string
+  bio: string
+  photo: string
+  supporterCount: number
+  supportingCount: number
+  categoryResolution: CategoryResolutionInterface[]
+  isPublic: boolean
+  isSupporting: boolean
+  isAuthenticatedUser: boolean
+}
+
 export const useUserStore = defineStore('user', () => {
   const userData: Ref<UserDataInterface | null> = ref(null)
+  const otherUser = ref<OtherUserInterface>({} as OtherUserInterface)
+  const userSupporter = ref<{
+    results: number
+    page: number
+    limit: number
+    data: UserSupporterInterface[]
+  }>({
+    results: 0,
+    page: 1,
+    limit: 10,
+    data: []
+  })
+  const performanceReport = ref<number>(0)
 
   const register = async (form: UserRegisterInterface) => {
     try {
@@ -83,6 +123,58 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const getOtherUser = async (userId: string) => {
+    try {
+      const { data } = await customAxios.get(`/users/${userId}`)
+
+      otherUser.value = data.data
+      return true
+    } catch (error) {
+      otherUser.value = {} as OtherUserInterface
+      return false
+    }
+  }
+
+  const getPerformanceReport = async (userId: string) => {
+    try {
+      const { data } = await customAxios.get(`/posts/performance/${userId}`)
+
+      if (userId === userData.value?._id) {
+        performanceReport.value = data.data
+      } else {
+        otherUser.value.performanceReport = data.data
+      }
+
+      return true
+    } catch (error) {
+      performanceReport.value = 0
+      otherUser.value.performanceReport = 0
+      return false
+    }
+  }
+
+  const getAllSupporter = async (userId: string) => {
+    try {
+      const { data } = await customAxios.get(`/users/${userId}/supporter`, {
+        params: {
+          limit: userSupporter.value.limit,
+          page: userSupporter.value.page
+        }
+      })
+
+      userSupporter.value.data = data.data
+      userSupporter.value.limit = data.limit
+      userSupporter.value.page = data.page
+      userSupporter.value.results = data.results
+    } catch (e) {
+      userSupporter.value.data = []
+      userSupporter.value.limit = 10
+      userSupporter.value.page = 1
+      userSupporter.value.results = 0
+      return false
+    }
+  }
+
   const editUserData = async (form: UserUpdateProfileInterface) => {
     try {
       await customAxios.patch('/users', form)
@@ -95,5 +187,17 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  return { userData, register, login, getUserData, editUserData }
+  return {
+    userData,
+    otherUser,
+    userSupporter,
+    performanceReport,
+    register,
+    login,
+    getUserData,
+    getOtherUser,
+    getAllSupporter,
+    getPerformanceReport,
+    editUserData
+  }
 })

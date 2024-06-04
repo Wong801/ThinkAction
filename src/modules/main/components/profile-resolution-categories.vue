@@ -1,12 +1,8 @@
 <script setup lang="ts">
-type Categories = {
-  [key: string]: any
-  id: string
-  category: string
-}
+import type { CategoryResolutionInterface } from '@/stores/user'
 
 export interface Props {
-  resolution_categories?: Array<Categories>
+  resolution_categories?: Array<CategoryResolutionInterface>
 }
 
 const props = withDefaults(defineProps<Props>(), {})
@@ -15,7 +11,7 @@ const props = withDefaults(defineProps<Props>(), {})
 <template>
   <div>
     <div class="grid grid-cols-3 gap-1">
-      <div v-for="category in props.resolution_categories" :key="category.id">
+      <div v-for="category in props.resolution_categories" :key="category._id">
         <button class="btn btn-outline-info hover:bg-[#3D8AF7] overflow-hidden">
           {{ category.name }}
         </button>

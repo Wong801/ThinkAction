@@ -1,6 +1,7 @@
 import customAxios from '@/plugins/custom-axios'
 import { defineStore } from 'pinia'
-import { ref, type Ref } from 'vue'
+import { ref } from 'vue'
+import type { CommentInterface } from './comment'
 
 export interface GetPostQuery {
   limit: number
@@ -40,25 +41,95 @@ export interface ResolutionInterface {
   isComplete: boolean
   createdDate: string
   userInfo: UserInfoInterface
-  likedByCurrent: string
+  likedByCurrent: boolean
+}
+
+export interface ResolutionDetailInterface extends ResolutionInterface {
+  comments: CommentInterface[]
+}
+
+export interface WeeklyGoalsFormInterface {
+  categoryResolutionId: string
+  type: 'weeklyGoals'
+  caption: string
+  photo: Array<string | File>
+  dueDate: Date
+  updatedDate: Date
+  shareWith: 'everyone' | 'supporter' | 'private'
 }
 
 export const usePostStore = defineStore('post', () => {
-  const currentPage: Ref<number> = ref(1)
-  const posts: Ref<ResolutionInterface[]> = ref([])
+  const posts = ref<{
+    limit: number
+    page: number
+    data: ResolutionInterface[]
+  }>({
+    limit: 10,
+    page: 1,
+    data: []
+  })
 
-  const getUserPost = async (
+  const post = ref<ResolutionDetailInterface>({} as ResolutionDetailInterface)
+
+  const getAllPosts = async (
     params: GetPostQuery = {
       limit: 10,
-      page: 10
+      page: 1
     }
   ) => {
-    const { data } = await customAxios.get('/posts', {
-      params
-    })
-    posts.value = data.data.data
-    currentPage.value = data.data.page
+    try {
+      const { data } = await customAxios.get('/posts', {
+        params
+      })
+      posts.value.data = data.data.data
+      posts.value.page = data.data.page
+      return true
+    } catch (error) {
+      posts.value.data = []
+      posts.value.page = 1
+      return false
+    }
   }
 
-  return { currentPage, posts, getUserPost }
+  const getOnePost = async (postId: string) => {
+    try {
+      const { data } = await customAxios.get(`/posts/${postId}`)
+
+      post.value = data.data
+    } catch (error) {
+      post.value = {} as ResolutionDetailInterface
+      return false
+    }
+  }
+
+  const saveWeekly = async (form: WeeklyGoalsFormInterface) => {
+    try {
+      await customAxios.post('/posts/weeklyGoals', form)
+      return true
+    } catch (error) {
+      return false
+    }
+  }
+
+  const likePost = async (postId: string) => {
+    try {
+      await customAxios.post('/posts/like', { postId })
+
+      return true
+    } catch (error) {
+      return false
+    }
+  }
+
+  const unlikePost = async (postId: string) => {
+    try {
+      await customAxios.post('/posts/unlike', { postId })
+
+      return true
+    } catch (error) {
+      return false
+    }
+  }
+
+  return { posts, post, getAllPosts, getOnePost, saveWeekly, likePost, unlikePost }
 })

@@ -1,61 +1,38 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import UserPost from '../components/user-post.vue'
 import PostComment from '../components/post-comment.vue'
+import { usePostStore } from '@/stores/post'
+import { useRoute } from 'vue-router'
+import { useCommentStore } from '@/stores/comment'
+import { BaseTextarea } from '@/components'
 
-const post = ref({
-  id: 'GhtHVSB12NHGBSGHHg',
-  user: {
-    name: 'Fitri',
-    avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL'
-  },
-  category: 'Education',
-  caption: 'Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet.',
-  photos: [
-    'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-    'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL'
-  ],
-  is_liked: false,
-  cheers_count: 20,
-  comments_count: 10,
-  date_time: '2019-08-24T14:15:22Z',
-  comments: [
-    {
-      id: 'GhtHVSB12NHGBSGHtg',
-      fullname: 'Fitri Andriyani',
-      avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-      date_time: '2019-08-24T14:15:22Z',
-      comment:
-        'lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet',
-      replies: [
-        {
-          id: 'GhtHVSB12NHGBSGHgg',
-          fullname: 'Jeno',
-          avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-          date_time: '2019-08-24T14:15:22Z',
-          comment:
-            'lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet'
-        },
-        {
-          id: 'GhtHVSB12NHGBSGHww',
-          fullname: 'Jaemin',
-          avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-          date_time: '2019-08-24T14:15:22Z',
-          comment:
-            'lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet'
-        }
-      ]
-    },
-    {
-      id: 'GhtHVSB12NHGBSGHtg',
-      fullname: 'Fadil',
-      avatar: 'https://ik.imagekit.io/at4li2svjc/PzV4gC17iYZl_HemoeHWaL',
-      date_time: '2019-08-24T14:15:22Z',
-      comment:
-        'lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet',
-      replies: []
+const route = useRoute()
+const postStore = usePostStore()
+const commentStore = useCommentStore()
+
+const post = computed(() => postStore.post)
+const comments = ref([...commentStore.comments])
+
+const newComment = ref('')
+
+const refreshComment = async () => {
+  await commentStore.getComments(route.params.id as string)
+  comments.value = commentStore.comments
+}
+
+const addComent = async () => {
+  if (newComment.value) {
+    if (await commentStore.addComent(route.params.id as string, newComment.value)) {
+      newComment.value = ''
+      await refreshComment()
     }
-  ]
+  }
+}
+
+onMounted(async () => {
+  await postStore.getOnePost(route.params.id as string)
+  await refreshComment()
 })
 </script>
 
@@ -63,26 +40,34 @@ const post = ref({
   <div class="main-content-container">
     <!-- USER POSTS -->
     <UserPost
-      :id="post.id"
-      :user="post.user"
-      :category="post.category"
+      :id="post._id"
+      :user="post.userInfo"
+      :category="post.categoryResolution"
       :caption="post.caption"
-      :photos="post.photos"
-      :is_liked="post.is_liked"
-      :cheers_count="post.cheers_count"
-      :comments_count="post.comments_count"
-      :date_time="post.date_time"
+      :photos="post.photo"
+      v-model:isLiked="post.likedByCurrent"
+      v-model:cheersCount="post.likeCount"
+      :commentsCount="post.commentCount"
+      :date_time="post.createdDate"
     ></UserPost>
 
-    <div v-for="comment in post.comments" :key="comment.id" class="shadow-lg border-2 rounded-lg">
+    <div v-for="comment in comments" :key="comment._id" class="shadow-lg border-2 rounded-lg">
       <PostComment
-        :id="comment.id"
-        :fullname="comment.fullname"
-        :avatar="comment.avatar"
-        :date_time="comment.date_time"
-        :comment="comment.comment"
-        :replies="comment.replies"
+        :id="comment._id"
+        :fullname="comment.userInfo.username"
+        :avatar="comment.userInfo.photo"
+        :date_time="comment.createdDate"
+        :comment="comment.message"
+        :replyCount="comment.replyCount"
+        :postId="post._id"
+        @create-reply="refreshComment"
       ></PostComment>
+    </div>
+
+    <!-- TEXTAREA -->
+    <div class="shadow-lg p-3 rounded-lg border-2 mb-5">
+      <component :is="BaseTextarea" v-model="newComment" border="full" class="mb-2"></component>
+      <button @click="addComent" class="btn btn-primary bg-[#3D8AF7]">KIRIM</button>
     </div>
   </div>
 </template>

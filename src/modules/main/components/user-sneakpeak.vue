@@ -1,16 +1,10 @@
 <script setup lang="ts">
-type User = {
-  [key: string]: any
-  id?: string
-  username?: string
-}
-
 export interface Props {
   id: string
   fullname: string
   username: string
   avatar: string
-  supporter: Array<User>
+  // supporter: Array<UserSupporterInterface>
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -24,10 +18,10 @@ const props = withDefaults(defineProps<Props>(), {
     <div>
       <p class="font-semibold">{{ props.username }}</p>
       <p class="">{{ props.fullname }}</p>
-      <div class="flex">
+      <!-- <div class="flex">
         <p class="">Supported by {{ props.supporter[0].username + ' ' + '+' }}</p>
         <p>{{ props.supporter.length - 1 }} more</p>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>

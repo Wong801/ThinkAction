@@ -1,43 +1,49 @@
 <!-- eslint-disable vue/no-mutating-props -->
 <script setup lang="ts">
+import { usePostStore, type UserInfoInterface } from '@/stores/post'
 import moment from 'moment'
-
-type User = {
-  [key: string]: any
-  name: string
-  avatar?: string
-}
+import { Swiper, SwiperSlide } from 'swiper/vue'
+// import Swiper and modules styles
+import 'swiper/css'
+import 'swiper/css/navigation'
+import 'swiper/css/pagination'
 
 export interface Props {
   id?: string
-  user?: User
+  user?: UserInfoInterface
   category?: string
   caption?: string
   photos?: Array<string>
-  is_liked?: boolean
-  cheers_count?: number
-  comments_count?: number
+  isLiked?: boolean
+  cheersCount: number
+  commentsCount?: number
   date_time?: string
 }
 
+const postStore = usePostStore()
+
 const props = withDefaults(defineProps<Props>(), {
   avatar: '/public/profile.png',
-  is_liked: false,
-  cheers_count: 0,
-  comments_count: 0
+  isLiked: false
+  // cheers_count: 0,
+  // comments_count: 0
 })
 
+const emit = defineEmits(['update:cheersCount', 'update:isLiked'])
+
 async function cheers() {
-  props.cheers_count += 1
-  props.is_liked = true
+  if (await postStore.likePost(props.id as string)) {
+    emit('update:cheersCount', props.cheersCount + 1)
+    emit('update:isLiked', true)
+  }
 }
 
 async function undoCheers() {
-  props.cheers_count -= 1
-  props.is_liked = false
+  if (await postStore.unlikePost(props.id as string)) {
+    emit('update:cheersCount', props.cheersCount - 1)
+    emit('update:isLiked', false)
+  }
 }
-
-console.log(`CHEERS ${JSON.stringify(props)}`)
 </script>
 
 <template>
@@ -46,12 +52,12 @@ console.log(`CHEERS ${JSON.stringify(props)}`)
     <router-link :to="{ path: `/post/${props.id}` }">
       <div class="flex space-x-3 mb-3">
         <img
-          :src="props.user?.avatar"
+          :src="props.user?.photo"
           alt="user-photo"
           class="w-20 h-20 bg-slate-300 rounded-full"
         />
         <div>
-          <p class="font-bold">{{ props.user?.name }}</p>
+          <p class="font-bold">{{ props.user?.username }}</p>
           <p>{{ props.category }}</p>
           <p>{{ moment(props.date_time).fromNow() }}</p>
         </div>
@@ -62,35 +68,39 @@ console.log(`CHEERS ${JSON.stringify(props)}`)
     </router-link>
 
     <!-- Slider main container -->
-    <swiper-container class="mySwiper" navigation="true">
+    <swiper :navigation="true" :slides-per-view="1">
       <swiper-slide v-for="photo in props.photos" :key="props.photos?.indexOf(photo)"
-        ><img :src="photo" alt="goals image" class="w-[200px] h-[200px]"
+        ><img :src="photo" alt="goals image"
       /></swiper-slide>
-    </swiper-container>
+    </swiper>
 
     <!-- cheers and comments -->
     <div>
-      <div>
-        <button @click="cheers" v-if="props.is_liked == false" class="btn btn-icon rounded-full">
-          <img src="/cheers.png" class="h-25px w-25px mr-2" />
+      <div class="flex gap-x-4 items-center">
+        <div v-if="!props.isLiked" class="flex items-center">
+          <button @click="cheers" class="btn btn-icon rounded-full">
+            <img src="/cheers.png" class="h-25px w-25px mr-2" />
+          </button>
           <router-link :to="{ path: `/post/${props.id}/cheers` }">
             <span>
-              {{ props.cheers_count }}
+              {{ props.cheersCount }}
             </span>
           </router-link>
-        </button>
+        </div>
 
-        <button @click="undoCheers" v-if="props.is_liked == true" class="btn btn-icon rounded-full">
-          <img src="/undo_cheers.png" class="h-25px w-25px mr-2" />
-          <router-link :to="{ path: `/post/${props.id}/cheers` }">
+        <div v-else class="flex items-center">
+          <button @click="undoCheers" class="btn btn-icon rounded-full">
+            <img src="/undo_cheers.png" class="h-25px w-25px mr-2" />
+          </button>
+          <router-link :to="{ path: `/post/${props.id}/cheers` }" class="px-2 py-1">
             <span>
-              {{ props.cheers_count }}
+              {{ props.cheersCount }}
             </span>
           </router-link>
-        </button>
+        </div>
 
         <button class="btn btn-icon rounded-full">
-          <i class="i-fas-comments h-25px w-25px mr-2"></i>{{ props.comments_count }}
+          <i class="i-fas-comments h-25px w-25px mr-2"></i>{{ props.commentsCount }}
         </button>
       </div>
       <div></div>
@@ -114,12 +124,11 @@ body {
   padding: 0;
 }
 
-swiper-container {
-  width: 100%;
-  height: 100%;
+.swiper {
+  height: 32rem;
 }
 
-swiper-slide {
+.swiper .swiper-slide {
   text-align: center;
   font-size: 18px;
   background: #fff;
@@ -128,9 +137,9 @@ swiper-slide {
   align-items: center;
 }
 
-swiper-slide img {
+.swiper .swiper-slide img {
   display: block;
-  width: 100%;
+  width: auto;
   height: 100%;
   object-fit: cover;
 }
