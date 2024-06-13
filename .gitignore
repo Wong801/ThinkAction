@@ -31,3 +31,4 @@ Docker.env
 *.njsproj
 *.sln
 *.sw?
+.vercel

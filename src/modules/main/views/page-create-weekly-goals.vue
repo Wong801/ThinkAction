@@ -6,6 +6,7 @@ import { useUserStore } from '@/stores/user'
 import type { OptionsInterface } from '@/components/base-select.vue'
 import { useRouter } from 'vue-router'
 import { useImageStore } from '@/stores/image'
+import dayjs from 'dayjs'
 
 const userStore = useUserStore()
 const postStore = usePostStore()
@@ -30,11 +31,11 @@ const categories = computed<OptionsInterface[]>(
 const form = ref<WeeklyGoalsFormInterface>({
   caption: '',
   categoryResolutionId: '',
-  dueDate: new Date(),
+  dueDate: dayjs(new Date()).format('YYYY-MM-DD'),
   photo: [],
   shareWith: 'everyone',
   type: 'weeklyGoals',
-  updatedDate: new Date()
+  updatedDate: dayjs(new Date()).format('YYYY-MM-DD')
 })
 
 const fakepath = ref('')
@@ -71,7 +72,7 @@ const submit = async (form: WeeklyGoalsFormInterface) => {
 
     <div>
       <p class="font-semibold text-lg text-[#3D8AF7] text-center mb-8">
-        Hi Fitri, you are now in week 8, let's set a goal!
+        Hi {{ userStore?.userData?.username }}, you are now in week 8, let's set a goal!
       </p>
 
       <!-- Select Resolution's Category -->

@@ -38,6 +38,7 @@
     "vue3-popper": "^1.5.0"
   },
   "devDependencies": {
+    "@cypress/vue": "^6.0.0",
     "@rushstack/eslint-patch": "^1.2.0",
     "@tsconfig/node18": "^2.0.1",
     "@types/cleave.js": "^1.4.7",
@@ -52,7 +53,6 @@
     "@vue/test-utils": "^2.3.2",
     "@vue/tsconfig": "^0.4.0",
     "autoprefixer": "^10.4.14",
-    "cypress": "^12.9.0",
     "dotenv": "^16.0.3",
     "eslint": "^8.38.0",
     "eslint-plugin-cypress": "^2.13.2",

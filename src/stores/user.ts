@@ -47,7 +47,7 @@ export interface UserUpdateProfileInterface {
   fullname: string
   username: string
   bio: string
-  photo: string | File
+  photo?: string | File
   isPublic: boolean
 }
 

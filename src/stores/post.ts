@@ -53,8 +53,17 @@ export interface WeeklyGoalsFormInterface {
   type: 'weeklyGoals'
   caption: string
   photo: Array<string | File>
-  dueDate: Date
-  updatedDate: Date
+  dueDate: string
+  updatedDate: string
+  shareWith: 'everyone' | 'supporter' | 'private'
+}
+
+export interface ResolutionFormInterface {
+  categoryName: string
+  type: 'resolutions'
+  caption: string
+  photo: Array<string | File>
+  dueDate: string
   shareWith: 'everyone' | 'supporter' | 'private'
 }
 
@@ -102,6 +111,15 @@ export const usePostStore = defineStore('post', () => {
     }
   }
 
+  const saveResolution = async (form: ResolutionFormInterface) => {
+    try {
+      await customAxios.post('/posts/resolutions', form)
+      return true
+    } catch (error) {
+      return false
+    }
+  }
+
   const saveWeekly = async (form: WeeklyGoalsFormInterface) => {
     try {
       await customAxios.post('/posts/weeklyGoals', form)
@@ -131,5 +149,5 @@ export const usePostStore = defineStore('post', () => {
     }
   }
 
-  return { posts, post, getAllPosts, getOnePost, saveWeekly, likePost, unlikePost }
+  return { posts, post, getAllPosts, getOnePost, saveResolution, saveWeekly, likePost, unlikePost }
 })

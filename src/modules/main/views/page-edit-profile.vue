@@ -35,6 +35,8 @@ const editProfile = async (payload: UserUpdateProfileInterface) => {
   if (payload.photo instanceof File) {
     const imageKey = await imageStore.uploadImage({ image: payload.photo })
     payload.photo = imageKey
+  } else {
+    payload.photo = undefined
   }
 
   await userStore.editUserData(payload)

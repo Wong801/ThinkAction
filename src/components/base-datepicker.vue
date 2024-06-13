@@ -39,7 +39,7 @@ const emit = defineEmits<{
 
 const value = computed({
   set: (text: string) => {
-    emit('isoValue', dayjs(text, 'DD/MM/YYYY').toISOString())
+    emit('isoValue', dayjs(text).format('DD/MM/YYYY'))
     emit('update:modelValue', text)
   },
   get: () => props.modelValue
@@ -61,7 +61,7 @@ const onClickDateRef = () => {
 const nativeDate = ref()
 
 watch(nativeDate, (newValue) => {
-  value.value = dayjs(new Date(newValue)).format('DD-MM-YYYY')
+  value.value = dayjs(new Date(newValue)).format('YYYY-MM-DD')
 })
 </script>
 
